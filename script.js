@@ -1,6 +1,7 @@
 let pressTimer = null;
+const signalBtn = document.getElementById('signalBtn');
 
-// When Continue is clicked
+// CONTINUE button
 document.getElementById('continueBtn').addEventListener('click', () => {
   const market = document.getElementById('marketInput').value.trim();
   if (!market) return alert("Please enter a market and pair name.");
@@ -11,21 +12,31 @@ document.getElementById('continueBtn').addEventListener('click', () => {
   document.getElementById('marketInput').classList.add('hidden');
 });
 
-// Signal button logic (Tap or Hold)
-document.getElementById('signalBtn').addEventListener('mousedown', () => {
-  pressTimer = setTimeout(() => {
-    generateSignal("DOWN");
-  }, 500); // Hold = DOWN
-});
+// 🔽 Hold = DOWN (touch or mouse), 🔼 Tap = UP
+function setupPressEvents() {
+  const startPress = () => {
+    pressTimer = setTimeout(() => {
+      generateSignal("DOWN");
+      pressTimer = null;
+    }, 500); // 0.5s = hold
+  };
 
-document.getElementById('signalBtn').addEventListener('mouseup', () => {
-  if (pressTimer) {
-    clearTimeout(pressTimer);
-    generateSignal("UP"); // Tap = UP
-  }
-});
+  const endPress = () => {
+    if (pressTimer) {
+      clearTimeout(pressTimer);
+      generateSignal("UP"); // It was just a tap
+    }
+  };
 
-// Generate fake signal with loading
+  // Mouse (desktop)
+  signalBtn.addEventListener("mousedown", startPress);
+  signalBtn.addEventListener("mouseup", endPress);
+
+  // Touch (mobile)
+  signalBtn.addEventListener("touchstart", startPress);
+  signalBtn.addEventListener("touchend", endPress);
+}
+
 function generateSignal(direction) {
   document.getElementById('dashboard').classList.add('hidden');
   document.getElementById('loading').classList.remove('hidden');
@@ -36,11 +47,13 @@ function generateSignal(direction) {
     document.getElementById('directionText').textContent = direction;
     document.getElementById('directionText').style.color = direction === "UP" ? "lime" : "red";
     document.getElementById('finalMarket').textContent = document.getElementById('marketDisplay').textContent;
-  }, 2500); // Simulate loading
+  }, 2500);
 }
 
-// Reset app
 function reset() {
   document.getElementById('result').classList.add('hidden');
   document.getElementById('dashboard').classList.remove('hidden');
 }
+
+// Call the setup
+setupPressEvents();
