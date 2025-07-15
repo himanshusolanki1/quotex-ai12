@@ -8,26 +8,35 @@
 </head>
 <body>
   <div class="container">
+    <!-- Logo at top -->
     <img src="logo.png" class="logo" alt="Binary God Logo" />
-    <img src="robot.png" class="robot" alt="AI Assistant" />
+
+    <!-- Title -->
     <h1>Binary God Premium AI</h1>
     <p class="subtitle">Powered by Smart Trading Logic™</p>
 
+    <!-- Robot below title -->
+    <img src="robot.png" class="robot" alt="AI Assistant" />
+
+    <!-- Market & Start -->
     <input type="text" id="marketInput" placeholder="Enter Market & Pair" />
     <button id="continueBtn">Continue</button>
 
+    <!-- Signal Dashboard -->
     <div id="dashboard" class="hidden">
       <p class="market-display" id="marketDisplay"></p>
       <input type="number" id="timerInput" placeholder="Set Timer in Seconds" value="30" />
       <button id="signalBtn">Hold for DOWN / Tap for UP</button>
     </div>
 
+    <!-- Loading UI -->
     <div id="loading" class="hidden">
       <p>🔗 Connecting to Quotex AI server...</p>
       <p>🔐 Authenticating...</p>
       <p>📊 Analyzing Pattern...</p>
     </div>
 
+    <!-- Result -->
     <div id="result" class="hidden">
       <p>Signal for <span id="finalMarket"></span>:</p>
       <h2 id="directionText"></h2>
