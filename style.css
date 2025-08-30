@@ -40,7 +40,7 @@ h1 {
 
 .subtitle {
   font-size: 0.9em;
-  color: #aaa;
+  color: #ffffff;
   margin-bottom: 20px;
 }
 
@@ -97,6 +97,7 @@ button:hover {
   font-weight: bold;
   margin: 10px 0;
 }
+
 
 
 
