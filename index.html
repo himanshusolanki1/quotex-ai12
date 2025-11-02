@@ -1,0 +1,537 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <!-- TITLE UPDATED -->
+  <title>Quotex Signal Software</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400..900&display=swap');
+    
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Inter', sans-serif;
+    }
+
+    body {
+      color: white;
+      text-align: center;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      overflow-x: hidden;
+      position: relative;
+    }
+
+    /* Background video */
+    #bgVideo {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      z-index: -2;
+      pointer-events: none;
+      user-select: none;
+      filter: brightness(0.7); /* optional dark effect */
+    }
+
+    /* Dark overlay */
+    body::before {
+      content: "";
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.55);
+      z-index: -1;
+    }
+
+    .container {
+      max-width: 600px;
+      padding: 20px;
+      position: relative;
+      z-index: 1;
+      width: 100%;
+      backdrop-filter: blur(5px);
+      background-color: rgba(1, 1, 1, 0.4);
+      border-radius: 20px;
+      border: 1px solid rgba(0, 242, 255, 0.2);
+    }
+
+    h1 {
+      font-size: 2rem;
+      font-weight: 700;
+      background: linear-gradient(to right, #00f2ff, #00ff95);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin-top: 15px;
+      font-family: 'Orbitron', sans-serif;
+    }
+
+    .subtitle {
+      font-size: 1.1rem;
+      font-weight: 500;
+      color: #aaa;
+    }
+
+    input[type="text"] {
+      background-color: #2c2c2c;
+      color: white;
+      border: 1px solid #444;
+      border-radius: 10px;
+      transition: border-color 0.3s;
+    }
+    input[type="text"]:focus {
+      outline: none;
+      border-color: #00f2ff;
+    }
+
+    button, .pair-item {
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+    button:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 5px 20px rgba(0, 242, 255, 0.3);
+    }
+    .pair-item:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 5px 20px rgba(0, 255, 149, 0.3);
+    }
+
+    .pair-item.selected {
+      border-color: #00f2ff;
+      background-color: rgba(0, 242, 255, 0.1);
+      transform: scale(1.05);
+      box-shadow: 0 0 25px rgba(0, 242, 255, 0.6);
+    }
+
+    #signalText {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 4rem;
+      font-weight: 900;
+      animation: pulse 1.5s infinite alternate;
+      transition: color 0.5s, text-shadow 0.5s;
+    }
+
+    .buy {
+      color: #00ff95;
+      text-shadow: 0 0 20px #00ff95, 0 0 30px #00ff95;
+    }
+    .sell {
+      color: #ff3366;
+      text-shadow: 0 0 20px #ff3366, 0 0 30px #ff3366;
+    }
+
+    @keyframes pulse {
+      from { transform: scale(1); opacity: 0.8; }
+      to { transform: scale(1.05); opacity: 1; }
+    }
+
+    .hidden { display: none !important; }
+
+    /* Modal for alerts */
+    .modal {
+      display: none;
+      position: fixed;
+      z-index: 10;
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0,0,0,0.8);
+      justify-content: center;
+      align-items: center;
+    }
+
+    .modal-content {
+      background-color: #222;
+      padding: 30px;
+      border-radius: 10px;
+      border: 2px solid #00f2ff;
+      width: 90%;
+      max-width: 400px;
+      text-align: center;
+      position: relative;
+    }
+
+    .close-btn {
+      color: #aaa;
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      font-size: 28px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+
+    .robot {
+      width: 150px;
+      margin: 20px auto;
+      display: block;
+      filter: drop-shadow(0 0 6px lime);
+      animation: float 3s ease-in-out infinite;
+    }
+
+    @keyframes float {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-10px); }
+    }
+
+    .loading-text {
+      opacity: 0;
+      transition: opacity 0.5s;
+    }
+    .loading-text.visible {
+      opacity: 1;
+    }
+    
+    /* NEW FADE-IN ANIMATION */
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .fade-in {
+      animation: fadeIn 0.5s ease-out forwards;
+    }
+  </style>
+</head>
+<body>
+  <!-- 
+    VIDEO INSTRUCTION: 
+    I've added a direct link to a free stock video below.
+    If you want a different one, you can replace the 'src' attribute
+    with another direct video link (.mp4).
+  -->
+  <video autoplay muted loop playsinline id="bgVideo" preload="auto"
+         controlslist="nodownload nofullscreen noremoteplayback"
+         disablePictureInPicture
+         poster="https://placehold.co/1920x1080/000000/333333?text=Loading+Video...">
+    <!-- UPDATED: Swapped to a different free stock video link -->
+    <source src="https://videos.pexels.com/video-files/3861457/3861457-hd_1920_1080_25fps.mp4" type="video/mp4">
+    <source src="https://cdn.pixabay.com/video/2023/04/01/151022-811124696_large.mp4" type="video/mp4">
+    Your browser does not support HTML5 video.
+  </video>
+
+  <!-- Modal HTML -->
+  <div id="alertModal" class="modal">
+    <div class="modal-content">
+      <span class="close-btn">&times;</span>
+      <p id="alertMessage"></p>
+    </div>
+  </div>
+
+  <div class="container">
+    <div class="flex flex-col items-center">
+      
+      <!-- LOGO UPDATED -->
+      <img src="lucky.png" class="w-24 h-24 rounded-full border-2 border-cyan-400 drop-shadow-lg animate-[pulse_3s_ease-in-out_infinite_alternate]" alt="Logo" />
+      
+      <!-- TEXT UPDATED -->
+      <h1 class="text-4xl mt-4">QUOTEX SIGNAL</h1>
+      <p class="subtitle mt-2">POWERED BY QUOTEX™</p>
+    </div>
+
+    <div id="pairSelection" class="mt-8">
+      <div class="flex items-center gap-2 mb-4">
+        <input type="text" id="searchInput" placeholder="Search for a pair..." class="flex-1 p-3 rounded-lg bg-gray-800 text-white border border-gray-600 focus:border-cyan-400">
+        <button id="searchBtn" class="bg-cyan-500 text-black font-bold py-2 px-4 rounded-lg shadow-lg">
+          Search
+        </button>
+      </div>
+
+      <div id="pairsGrid" class="grid grid-cols-2 sm:grid-cols-3 gap-4 mb-4">
+        <!-- OTC pairs will be dynamically inserted here -->
+      </div>
+      
+      <div class="flex justify-between items-center mb-4">
+        <button id="prevBtn" class="bg-gray-700 text-white font-bold py-2 px-4 rounded-lg shadow-lg">Back</button>
+        <span id="pageInfo" class="text-sm text-gray-400">Page 1 of 8</span>
+        <button id="nextBtn" class="bg-gray-700 text-white font-bold py-2 px-4 rounded-lg shadow-lg">Next</button>
+      </div>
+      
+      <button id="continueBtn" class="bg-cyan-500 text-black font-bold py-3 px-8 rounded-lg shadow-lg w-full mt-4 hidden">CONTINUE</button>
+    </div>
+
+    <div id="dashboard" class="hidden mt-8">
+      
+      <!-- NEW: SVG ROBOT PLACEHOLDER -->
+      <svg class="robot" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+        <style>
+          .robot-scan {
+            animation: scan 4s ease-in-out infinite;
+            transform-origin: 50% 30%;
+          }
+          @keyframes scan {
+            0% { transform: rotate(-30deg) scaleY(1); }
+            10% { transform: rotate(30deg) scaleY(1); }
+            20% { transform: rotate(-30deg) scaleY(1); }
+            30% { transform: rotate(30deg) scaleY(1); }
+            40% { transform: rotate(0deg) scaleY(1); }
+            50% { transform: rotate(0deg) scaleY(1.1); }
+            60% { transform: rotate(0deg) scaleY(1); }
+            100% { transform: rotate(0deg) scaleY(1); }
+          }
+          .robot-light {
+            animation: blink 2s infinite;
+          }
+          @keyframes blink {
+            0%, 40%, 100% { fill: #00ff95; }
+            50% { fill: #fff; }
+          }
+        </style>
+        <g filter="drop-shadow(0 0 4px #00ff95)">
+          <!-- Head -->
+          <rect x="30" y="20" width="40" height="25" rx="5" fill="#555" stroke="#777" stroke-width="1" />
+          <!-- Eye/Visor -->
+          <rect x="35" y="27" width="30" height="10" fill="#000" />
+          <path class="robot-scan" d="M35 32 H 65 L 60 27 H 40 Z" fill="rgba(0, 242, 255, 0.7)" />
+          <!-- Antenna -->
+          <line x1="50" y1="20" x2="50" y2="15" stroke="#aaa" stroke-width="2" />
+          <circle class="robot-light" cx="50" cy="13" r="3" fill="#00ff95" />
+          <!-- Body -->
+          <rect x="25" y="45" width="50" height="40" rx="8" fill="#444" stroke="#777" stroke-width="1" />
+          <!-- Screen on body -->
+          <rect x="35" y="55" width="30" height="20" rx="3" fill="#000" />
+          <polyline points="38 70, 45 60, 52 65, 58 60, 62 68" stroke="#00ff95" stroke-width="2" fill="none" />
+        </g>
+      </svg>
+      
+      <p class="market-display text-xl font-semibold text-gray-300" id="marketDisplay"></p>
+      <select id="timerInput" class="w-full p-3 rounded-lg bg-gray-800 text-white border border-gray-600 focus:border-cyan-400 mt-4">
+        <option value="30 Seconds">30 Seconds</option>
+        <option value="1 MIN">1 MIN</option>
+        <option value="2 MIN">2 MIN</option>
+        <option value="5 MIN">5 MIN</option>
+      </select>
+      <button id="signalBtn" class="bg-cyan-500 text-black font-bold py-4 px-8 rounded-lg shadow-lg w-full mt-4">GET SIGNAL</button>
+      <button id="selectPairBtn" class="bg-gray-700 text-white font-bold py-3 px-8 rounded-lg shadow-lg w-full mt-4">SELECT DIFFERENT PAIR</button>
+    </div>
+
+    <div id="loading" class="hidden mt-8">
+      <!-- TEXT UPDATED -->
+      <p id="loadingStep1" class="loading-text text-lg text-gray-400">🔗 Connecting to Quotex server...</p>
+      <p id="loadingStep2" class="loading-text text-lg text-gray-400">🔐 Authenticating...</p>
+      <p id="loadingStep3" class="loading-text text-lg text-gray-400">📊 Analyzing Market...</p>
+    </div>
+
+    <div id="result" class="hidden mt-8">
+      <p class="text-xl font-semibold text-gray-300">Signal for <span id="finalMarket"></span>:</p>
+      <h2 id="signalText" class="mt-4"></h2>
+      <p class="text-lg text-gray-400 mt-2">Timer: <span id="finalTimer"></span></p>
+      <p class="text-md text-gray-400 mt-2">Market Status: <span id="marketStatus"></span></p>
+      <p class="text-md text-gray-400 mt-2">Confidence: <span id="confidence"></span></p>
+      <button onclick="reset()" class="bg-green-500 text-black font-bold py-3 px-8 rounded-lg shadow-lg w-full mt-6">NEXT SIGNAL</button>
+    </div>
+  </div>
+
+  <script>
+    const otcPairs = [
+      "EUR/USD OTC", "USD/JPY OTC", "GBP/USD OTC", "USD/CHF OTC", "AUD/USD OTC", "USD/CAD OTC", "NZD/USD OTC",
+      "EUR/GBP OTC", "EUR/JPY OTC", "GBP/JPY OTC", "EUR/AUD OTC", "EUR/CAD OTC", "EUR/CHF OTC", "EUR/NZD OTC",
+      "GBP/AUD OTC", "GBP/CAD OTC", "GBP/CHF OTC", "GBP/NZD OTC", "AUD/CAD OTC", "AUD/CHF OTC", "AUD/JPY OTC",
+      "AUD/NZD OTC", "CAD/CHF OTC", "CAD/JPY OTC", "CHF/JPY OTC", "NZD/CAD OTC", "NZD/CHF OTC", "NZD/JPY OTC",
+      "USD/SEK OTC", "USD/NOK OTC", "USD/PLN OTC", "USD/ZAR OTC", "EUR/SEK OTC", "EUR/NOK OTC", "EUR/PLN OTC",
+      "EUR/ZAR OTC", "GBP/SEK OTC", "GBP/NOK OTC", "GBP/PLN OTC", "USD/RUB OTC", "EUR/RUB OTC", "TRY/JPY OTC",
+      "XAU/USD OTC", "XAG/USD OTC", "BTC/USD OTC", "ETH/USD OTC", "LTC/USD OTC", "BCH/USD OTC", "XRP/USD OTC",
+      "DOGE/USD OTC", "USD/TRY OTC", "USD/SGD OTC", "AUD/SGD OTC", "CAD/SGD OTC", "CHF/SGD OTC", "EUR/SGD OTC",
+      "GBP/SGD OTC", "NZD/SGD OTC", "SGD/JPY OTC", "USD/THB OTC", "EUR/THB OTC", "USD/MXN OTC", "GBP/MXN OTC",
+      "AUD/THB OTC", "EUR/HUF OTC", "GBP/HUF OTC", "USD/HUF OTC", "EUR/CZK OTC", "GBP/CZK OTC", "USD/CZK OTC",
+      "EUR/RON OTC", "USD/RON OTC", "USD/ILS OTC", "AUD/HKD OTC", "CAD/HKD OTC", "CHF/HKD OTC", "EUR/HKD OTC",
+      "GBP/HKD OTC", "NZD/HKD OTC", "USD/HKD OTC", "USD/KRW OTC", "AUD/KRW OTC", "EUR/KRW OTC", "USD/TWD OTC",
+      "EUR/DKK OTC", "USD/DKK OTC", "CAD/DKK OTC", "CHF/DKK OTC", "AUD/DKK OTC", "GBP/DKK OTC", "NZD/DKK OTC",
+      "EUR/ISK OTC", "USD/ISK OTC", "AUD/ISK OTC", "GBP/ISK OTC", "NZD/ISK OTC", "CAD/ISK OTC", "CHF/ISK OTC",
+      "HKD/ISK OTC", "JPY/ISK OTC", "SEK/ISK OTC", "NOK/ISK OTC", "PLN/ISK OTC", "AED/CNY OTC", "USD/BRL OTC", 
+      "USD/PKR OTC",
+      // --- NEW PAIRS ADDED BELOW ---
+      "USD/DZD OTC", "USD/BDT OTC", "USD/COP OTC", "USD/INR OTC", "USD/IDR OTC", "USD/ARS OTC", "USD/PHP OTC", 
+      "USD/EGP OTC", "USD/NGN OTC"
+    ];
+
+    let currentPage = 0;
+    const pairsPerPage = 6;
+    let selectedPair = null;
+
+    const pairsGrid = document.getElementById('pairsGrid');
+    const prevBtn = document.getElementById('prevBtn');
+    const nextBtn = document.getElementById('nextBtn');
+    const pageInfo = document.getElementById('pageInfo');
+    const searchInput = document.getElementById('searchInput');
+    const searchBtn = document.getElementById('searchBtn');
+    const continueBtn = document.getElementById('continueBtn');
+    const signalBtn = document.getElementById('signalBtn');
+    const selectPairBtn = document.getElementById('selectPairBtn');
+    
+    // NEW: Get elements for animation
+    const pairSelectionEl = document.getElementById('pairSelection');
+    const dashboardEl = document.getElementById('dashboard');
+    const loadingEl = document.getElementById('loading');
+    const resultEl = document.getElementById('result');
+
+    // Custom modal functions
+    const alertModal = document.getElementById('alertModal');
+    const alertMessage = document.getElementById('alertMessage');
+    const closeBtn = document.querySelector('.close-btn');
+
+    function showAlert(message) {
+      alertMessage.textContent = message;
+      alertModal.style.display = 'flex';
+    }
+
+    closeBtn.addEventListener('click', () => {
+      alertModal.style.display = 'none';
+    });
+
+    window.addEventListener('click', (e) => {
+      if (e.target === alertModal) {
+        alertModal.style.display = 'none';
+      }
+    });
+
+    function renderPairs(pairsToRender) {
+      pairsGrid.innerHTML = '';
+      pairsToRender.forEach(pair => {
+        const pairItem = document.createElement('div');
+        pairItem.className = `pair-item cursor-pointer p-4 rounded-lg border-2 border-transparent bg-gray-800 text-center font-bold text-lg hover:border-cyan-500 hover:bg-gray-700 ${pair === selectedPair ? 'selected' : ''}`;
+        pairItem.textContent = pair;
+        pairItem.addEventListener('click', () => {
+          document.querySelectorAll('.pair-item').forEach(item => item.classList.remove('selected'));
+          pairItem.classList.add('selected');
+          selectedPair = pair;
+          continueBtn.classList.remove('hidden');
+        });
+        pairsGrid.appendChild(pairItem);
+      });
+    }
+
+    function updatePagination() {
+      const startIndex = currentPage * pairsPerPage;
+      const endIndex = startIndex + pairsPerPage;
+      let pairsToDisplay = otcPairs;
+
+      if (searchInput.value.trim() !== '') {
+        pairsToDisplay = otcPairs.filter(pair => pair.toLowerCase().includes(searchInput.value.trim().toLowerCase()));
+      }
+
+      const totalPages = Math.ceil(pairsToDisplay.length / pairsPerPage);
+      const currentPairs = pairsToDisplay.slice(startIndex, endIndex);
+
+      renderPairs(currentPairs);
+      pageInfo.textContent = `Page ${currentPage + 1} of ${totalPages > 0 ? totalPages : 1}`;
+
+      prevBtn.disabled = currentPage === 0;
+      nextBtn.disabled = currentPage >= totalPages - 1;
+
+      if (prevBtn.disabled) prevBtn.classList.add('opacity-50'); else prevBtn.classList.remove('opacity-50');
+      if (nextBtn.disabled) nextBtn.classList.add('opacity-50'); else nextBtn.classList.remove('opacity-50');
+    }
+
+    prevBtn.addEventListener('click', () => {
+      if (currentPage > 0) {
+        currentPage--;
+        updatePagination();
+      }
+    });
+
+    nextBtn.addEventListener('click', () => {
+      const filterValue = searchInput.value.trim().toLowerCase();
+      const pairsToDisplay = otcPairs.filter(pair => pair.toLowerCase().includes(filterValue));
+      const totalPages = Math.ceil(pairsToDisplay.length / pairsPerPage);
+      if (currentPage < totalPages - 1) {
+        currentPage++;
+        updatePagination();
+      }
+    });
+
+    searchBtn.addEventListener('click', () => {
+      currentPage = 0;
+      updatePagination();
+    });
+
+    searchInput.addEventListener('input', () => {
+      currentPage = 0;
+      updatePagination();
+    });
+
+    continueBtn.addEventListener('click', () => {
+      if (!selectedPair) {
+        return showAlert("Please select a market pair to continue.");
+      }
+      pairSelectionEl.classList.add('hidden');
+      dashboardEl.classList.remove('hidden');
+      dashboardEl.classList.add('fade-in'); // NEW: Add animation class
+      document.getElementById('marketDisplay').textContent = selectedPair;
+    });
+
+    selectPairBtn.addEventListener('click', () => {
+      dashboardEl.classList.add('hidden');
+      dashboardEl.classList.remove('fade-in'); // NEW: Remove animation class
+      pairSelectionEl.classList.remove('hidden');
+      pairSelectionEl.classList.add('fade-in'); // NEW: Add animation class
+      selectedPair = null;
+      document.querySelectorAll('.pair-item').forEach(item => item.classList.remove('selected'));
+      continueBtn.classList.add('hidden');
+    });
+
+    signalBtn.addEventListener('click', () => {
+      const direction = Math.random() < 0.5 ? "BUY" : "SELL";
+      generateSignal(direction);
+    });
+
+    function generateSignal(direction) {
+      dashboardEl.classList.add('hidden');
+      dashboardEl.classList.remove('fade-in'); // NEW: Remove animation class
+      loadingEl.classList.remove('hidden');
+      loadingEl.classList.add('fade-in'); // NEW: Add animation class
+      document.getElementById('loadingStep1').classList.remove('visible');
+      document.getElementById('loadingStep2').classList.remove('visible');
+      document.getElementById('loadingStep3').classList.remove('visible');
+
+      setTimeout(() => {
+        document.getElementById('loadingStep1').classList.add('visible');
+      }, 500);
+      setTimeout(() => {
+        document.getElementById('loadingStep2').classList.add('visible');
+      }, 1500);
+      setTimeout(() => {
+        document.getElementById('loadingStep3').classList.add('visible');
+      }, 2500);
+
+      const marketStatus = direction === "BUY" ? "Bullish" : "Bearish";
+      const confidence = Math.floor(Math.random() * (100 - 90 + 1)) + 90;
+
+      setTimeout(() => {
+        loadingEl.classList.add('hidden');
+        loadingEl.classList.remove('fade-in'); // NEW: Remove animation class
+        resultEl.classList.remove('hidden');
+        resultEl.classList.add('fade-in'); // NEW: Add animation class
+        
+        document.getElementById('signalText').textContent = direction;
+        document.getElementById('signalText').className = `mt-4 ${direction.toLowerCase()}`;
+        document.getElementById('finalMarket').textContent = document.getElementById('marketDisplay').textContent;
+        document.getElementById('finalTimer').textContent = document.getElementById('timerInput').value;
+        document.getElementById('marketStatus').textContent = marketStatus;
+        document.getElementById('confidence').textContent = `${confidence}%`;
+      }, 3500);
+    }
+
+    function reset() {
+      resultEl.classList.add('hidden');
+      resultEl.classList.remove('fade-in'); // NEW: Remove animation class
+      dashboardEl.classList.remove('hidden');
+      dashboardEl.classList.add('fade-in'); // NEW: Add animation class
+    }
+    
+    // Initial render
+    updatePagination();
+  </script>
+</body>
+</html>
+
