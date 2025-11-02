@@ -28,18 +28,21 @@
       position: relative;
     }
 
-    /* Background video */
-    #bgVideo {
+    /* NEW: Blurred image background */
+    #bgImage {
       position: fixed;
       top: 0;
       left: 0;
       width: 100%;
       height: 100%;
-      object-fit: cover;
+      background-image: url('lucky.png');
+      background-size: cover;
+      background-position: center;
+      filter: blur(8px);
+      transform: scale(1.1); /* Prevents blurred edges from showing */
       z-index: -2;
       pointer-events: none;
       user-select: none;
-      filter: brightness(0.7); /* optional dark effect */
     }
 
     /* Dark overlay */
@@ -213,19 +216,9 @@
   </style>
 </head>
 <body>
-  <!-- 
-    VIDEO INSTRUCTION: 
-    I've added a new direct link to a free stock video below
-    that fits the "AI Trading" theme.
-  -->
-  <video autoplay muted loop playsinline id="bgVideo" preload="auto"
-         controlslist="nodownload nofullscreen noremoteplayback"
-         disablePictureInPicture
-         poster="https://placehold.co/1920x1080/000000/333333?text=Loading+Video...">
-    <!-- UPDATED: New AI Trading / Plexus video link -->
-    <source src="https://videos.pexels.com/video-files/8571120/8571120-hd_1920_1080_25fps.mp4" type="video/mp4">
-    Your browser does not support HTML5 video.
-  </video>
+  
+  <!-- NEW: Background div for blurred lucky.png -->
+  <div id="bgImage"></div>
 
   <!-- Modal HTML -->
   <div id="alertModal" class="modal">
@@ -396,7 +389,6 @@
       alertModal.style.display = 'none';
     });
 
-Example of a futuristic plexus network nodes animation.
     window.addEventListener('click', (e) => {
       if (e.target === alertModal) {
         alertModal.style.display = 'none';
@@ -423,9 +415,10 @@ Example of a futuristic plexus network nodes animation.
       const startIndex = currentPage * pairsPerPage;
       const endIndex = startIndex + pairsPerPage;
       let pairsToDisplay = otcPairs;
-
+      
+      // JAVASCRIPT FIX: .valume() corrected to .value
       if (searchInput.value.trim() !== '') {
-        pairsToDisplay = otcPairs.filter(pair => pair.toLowerCase().includes(searchInput.valume().trim().toLowerCase()));
+        pairsToDisplay = otcPairs.filter(pair => pair.toLowerCase().includes(searchInput.value.trim().toLowerCase()));
       }
 
       const totalPages = Math.ceil(pairsToDisplay.length / pairsPerPage);
@@ -449,6 +442,7 @@ Example of a futuristic plexus network nodes animation.
     });
 
     nextBtn.addEventListener('click', () => {
+      // JAVASCRIPT FIX: .valume() corrected to .value
       const filterValue = searchInput.value.trim().toLowerCase();
       const pairsToDisplay = otcPairs.filter(pair => pair.toLowerCase().includes(filterValue));
       const totalPages = Math.ceil(pairsToDisplay.length / pairsPerPage);
@@ -478,7 +472,8 @@ Example of a futuristic plexus network nodes animation.
       document.getElementById('marketDisplay').textContent = selectedPair;
     });
 
-    selectPairBtn.addEventListener('click', ()s => {
+    // JAVASCRIPT FIX: ()s corrected to ()
+    selectPairBtn.addEventListener('click', () => {
       dashboardEl.classList.add('hidden');
       dashboardEl.classList.remove('fade-in'); // NEW: Remove animation class
       pairSelectionEl.classList.remove('hidden');
