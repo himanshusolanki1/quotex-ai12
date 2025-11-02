@@ -135,6 +135,15 @@
       to { transform: scale(1.05); opacity: 1; }
     }
 
+    /* NEW: Animation for rotating logo */
+    @keyframes spin {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
+    .animate-spin-slow {
+      animation: spin 10s linear infinite;
+    }
+
     .hidden { display: none !important; }
 
     /* Modal for alerts */
@@ -206,17 +215,15 @@
 <body>
   <!-- 
     VIDEO INSTRUCTION: 
-    I've added a direct link to a free stock video below.
-    If you want a different one, you can replace the 'src' attribute
-    with another direct video link (.mp4).
+    I've added a new direct link to a free stock video below
+    that fits the "AI Trading" theme.
   -->
   <video autoplay muted loop playsinline id="bgVideo" preload="auto"
          controlslist="nodownload nofullscreen noremoteplayback"
          disablePictureInPicture
          poster="https://placehold.co/1920x1080/000000/333333?text=Loading+Video...">
-    <!-- UPDATED: Swapped to a different free stock video link -->
-    <source src="https://videos.pexels.com/video-files/3861457/3861457-hd_1920_1080_25fps.mp4" type="video/mp4">
-    <source src="https://cdn.pixabay.com/video/2023/04/01/151022-811124696_large.mp4" type="video/mp4">
+    <!-- UPDATED: New AI Trading / Plexus video link -->
+    <source src="https://videos.pexels.com/video-files/8571120/8571120-hd_1920_1080_25fps.mp4" type="video/mp4">
     Your browser does not support HTML5 video.
   </video>
 
@@ -231,8 +238,8 @@
   <div class="container">
     <div class="flex flex-col items-center">
       
-      <!-- LOGO UPDATED -->
-      <img src="lucky.png" class="w-24 h-24 rounded-full border-2 border-cyan-400 drop-shadow-lg animate-[pulse_3s_ease-in-out_infinite_alternate]" alt="Logo" />
+      <!-- LOGO UPDATED: Using lucky.png and new animate-spin-slow class -->
+      <img src="lucky.png" class="w-24 h-24 rounded-full border-2 border-cyan-400 drop-shadow-lg animate-spin-slow" alt="Logo" />
       
       <!-- TEXT UPDATED -->
       <h1 class="text-4xl mt-4">QUOTEX SIGNAL</h1>
@@ -274,7 +281,7 @@
             10% { transform: rotate(30deg) scaleY(1); }
             20% { transform: rotate(-30deg) scaleY(1); }
             30% { transform: rotate(30deg) scaleY(1); }
-            40% { transform: rotate(0deg) scaleY(1); }
+            4s0% { transform: rotate(0deg) scaleY(1); }
             50% { transform: rotate(0deg) scaleY(1.1); }
             60% { transform: rotate(0deg) scaleY(1); }
             100% { transform: rotate(0deg) scaleY(1); }
@@ -389,6 +396,7 @@
       alertModal.style.display = 'none';
     });
 
+Example of a futuristic plexus network nodes animation.
     window.addEventListener('click', (e) => {
       if (e.target === alertModal) {
         alertModal.style.display = 'none';
@@ -417,7 +425,7 @@
       let pairsToDisplay = otcPairs;
 
       if (searchInput.value.trim() !== '') {
-        pairsToDisplay = otcPairs.filter(pair => pair.toLowerCase().includes(searchInput.value.trim().toLowerCase()));
+        pairsToDisplay = otcPairs.filter(pair => pair.toLowerCase().includes(searchInput.valume().trim().toLowerCase()));
       }
 
       const totalPages = Math.ceil(pairsToDisplay.length / pairsPerPage);
@@ -470,7 +478,7 @@
       document.getElementById('marketDisplay').textContent = selectedPair;
     });
 
-    selectPairBtn.addEventListener('click', () => {
+    selectPairBtn.addEventListener('click', ()s => {
       dashboardEl.classList.add('hidden');
       dashboardEl.classList.remove('fade-in'); // NEW: Remove animation class
       pairSelectionEl.classList.remove('hidden');
